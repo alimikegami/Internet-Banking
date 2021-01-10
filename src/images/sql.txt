@@ -1,0 +1,52 @@
+// create database
+CREATE DATABASE banking_system;
+
+//first_name, last_name, NIK, street_address, sub_district, regency, province, gender, email
+
+
+CREATE TABLE customer (
+	customer_id int NOT NULL AUTO_INCREMENT,
+	first_name varchar(50) NOT NULL,
+	middle_name varchar(50) NULL,
+	last_name varchar(50) NOT NULL,
+	NIK varchar(16) NOT NULL,
+	street_address varchar(75) NOT NULL,
+	sub_district varchar(50) NOT NULL,
+	regency varchar(50) NOT NULL,
+	province varchar(50) NOT NULL,
+	gender enum('male', 'female') NOT NULL,
+	email varchar(50) NOT NULL,
+	PRIMARY KEY(customer_id)
+);
+
+//customer_id, username, password, balance, validation
+
+CREATE TABLE customer_account (
+	account_id int NOT NULL AUTO_INCREMENT,
+	customer_id int,
+	username varchar(50) NOT NULL,
+	password varchar(50) NOT NULL,
+	balance int(20) NOT NULL,
+	validation enum('valid', 'not valid', 'blocked'),
+	PRIMARY KEY(account_id),
+	FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
+);
+
+CREATE TABLE employee_account (
+	employee_id int NOT NULL AUTO_INCREMENT,
+	employee_username varchar(50) NOT NULL,
+	employee_password varchar(50) NOT NULL,
+	PRIMARY KEY(employee_id)
+);
+
+INSERT INTO employee_account (employee_username, employee_password) VALUES ("admin", "admin2020");
+
+CREATE TABLE transfer_history (
+	transfer_id int NOT NULL AUTO_INCREMENT,
+	transferFrom varchar(50) NOT NULL,
+	transferTo varchar(50)NOT NULL,
+	amount int NOT NULL,
+	time TIMESTAMP NOT NULL,
+	additional_info varchar(50) NULL,
+	PRIMARY KEY(transfer_id)
+);
