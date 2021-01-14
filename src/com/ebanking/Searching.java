@@ -15,6 +15,8 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -40,7 +42,25 @@ public class Searching extends JFrame {
     boolean flag;
     private final int userAmount = getUserAmount();
     Searching(String username, String password){
-        
+        this.addWindowFocusListener(new WindowFocusListener(){
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                searchingPanel.removeAll();
+                searchingPanel.revalidate();
+                searchingPanel.repaint();
+                getAccountData();
+                try {
+                    createSearchPanel(userAmount);
+                } catch (SQLException sqle) {
+                    System.out.println("gagal di load data");
+                }
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+            
+            }
+        });
         EmployeeMenu.username = username;
         EmployeeMenu.password = password;
         this.allAccount = new String[userAmount][8];
@@ -573,6 +593,7 @@ public class Searching extends JFrame {
         
         JPanel delete = new JPanel(new GridBagLayout());
         JPanel unblock = new JPanel(new GridBagLayout());
+        JPanel block = new JPanel(new GridBagLayout());
         delete.setBackground(new Color(110, 60, 160));
         delete.add(createLabelDelete());
         gbc.gridx = 4;
@@ -659,29 +680,56 @@ public class Searching extends JFrame {
                 public void mouseClicked(MouseEvent e){
                     int answer = JOptionPane.showConfirmDialog(null, "Are you sure you want to unblock this account?", "Unblock Account", JOptionPane.YES_NO_OPTION);
                     if(answer == JOptionPane.YES_OPTION) {
-                        panel.remove(delete);
-                        panel.remove(unblock);
-                        panel.revalidate();
-                        panel.repaint();
                         String query = "UPDATE customer_account SET validation = 'valid' WHERE username = '" + allAccount[counter][0] + "'";
-                        JLabel deleted = new JLabel("Account unblocked!");
                         try {
                             Statement st = conn.createStatement();
                             st.execute(query);
                         }catch (SQLException sqlex) {
                             System.out.println("Gagal di unblock");
                         }
-                        deleted.setForeground(Color.GREEN);
-                        gbc.gridx = 4;
-                        gbc.gridy = 0;
-                        gbc.weightx = 0;
-                        gbc.gridheight = 2;
-                        gbc.insets = new Insets(20, 0, 0, 20);
-                        gbc.anchor = GridBagConstraints.LINE_START;
-                        panel.add(deleted, gbc);
                     }
                 }
             });
+        } else {
+            block.setBackground(new Color(110, 60, 160));
+            block.add(createLabelBlock());
+            gbc.gridx = 4;
+            gbc.gridy = 2;
+            gbc.insets = new Insets(20, 0, 0, 20);
+            panel.add(block, gbc);
+            block.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            block.addMouseListener(new MouseAdapter(){
+                @Override
+                public void mouseEntered(MouseEvent e){
+
+                }
+                @Override
+                public void mouseExited(MouseEvent e){
+
+                }
+                @Override
+                public void mousePressed(MouseEvent e){
+
+                }
+                @Override
+                public void mouseReleased(MouseEvent e){
+
+                }
+                @Override
+                public void mouseClicked(MouseEvent e){
+                    int answer = JOptionPane.showConfirmDialog(null, "Are you sure you want to block this account?", "Block Account", JOptionPane.YES_NO_OPTION);
+                    if(answer == JOptionPane.YES_OPTION) {
+                        String query = "UPDATE customer_account SET validation = 'blocked' WHERE username = '" + allAccount[counter][0] + "'";
+                        try {
+                            Statement st = conn.createStatement();
+                            st.execute(query);
+                        }catch (SQLException sqlex) {
+                            System.out.println("Gagal di block");
+                        }
+                    }
+                }
+            });
+        
         }
         
         return panel;
@@ -829,6 +877,11 @@ public class Searching extends JFrame {
     
     public JLabel createLabelUnblock(){
         ImageIcon img = new ImageIcon(getClass().getResource("/images/unblock.png"));
+        return new JLabel(img);
+    }
+    
+    public JLabel createLabelBlock(){
+        ImageIcon img = new ImageIcon(getClass().getResource("/images/block.png"));
         return new JLabel(img);
     }
 }
